@@ -1,15 +1,18 @@
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { Upload, Trash2, FileText } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { subjects, sampleMaterials, type StudyMaterial } from '@/lib/data';
+import { subjects, type StudyMaterial } from '@/lib/data';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const Admin = () => {
-  const [materials, setMaterials] = useState<StudyMaterial[]>(sampleMaterials);
+  const { isAdmin } = useAuth();
+  const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
@@ -43,6 +46,8 @@ const Admin = () => {
     setMaterials((prev) => prev.filter((m) => m.id !== id));
     toast.success('Material deleted');
   };
+
+  if (!isAdmin) return <Navigate to="/login" replace />;
 
   return (
     <div className="min-h-screen">
