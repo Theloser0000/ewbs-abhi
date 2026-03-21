@@ -47,6 +47,8 @@ const Admin = () => {
     toast.success('Material deleted');
   };
 
+  if (!isAdmin) return <Navigate to="/login" replace />;
+
   return (
     <div className="min-h-screen">
       <Navbar />
