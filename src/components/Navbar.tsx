@@ -1,17 +1,25 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Menu, X } from 'lucide-react';
+import { BookOpen, Menu, X, LogIn, LogOut, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const Navbar = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isAdmin, logout } = useAuth();
 
   const links = [
     { to: '/', label: 'Home' },
     { to: '/materials', label: 'Materials' },
-    { to: '/admin', label: 'Admin' },
+    ...(isAdmin ? [{ to: '/admin', label: 'Admin' }] : []),
   ];
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out');
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
@@ -33,6 +41,19 @@ const Navbar = () => {
               </Button>
             </Link>
           ))}
+          {isAdmin ? (
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5 text-muted-foreground">
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          ) : (
+            <Link to="/login">
+              <Button variant="ghost" size="sm" className="gap-1.5">
+                <LogIn className="h-4 w-4" />
+                Admin Login
+              </Button>
+            </Link>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -59,6 +80,19 @@ const Navbar = () => {
               </Button>
             </Link>
           ))}
+          {isAdmin ? (
+            <Button variant="ghost" className="w-full justify-start gap-1.5 text-muted-foreground" onClick={() => { handleLogout(); setMobileOpen(false); }}>
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          ) : (
+            <Link to="/login" onClick={() => setMobileOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start gap-1.5">
+                <LogIn className="h-4 w-4" />
+                Admin Login
+              </Button>
+            </Link>
+          )}
         </div>
       )}
     </nav>
