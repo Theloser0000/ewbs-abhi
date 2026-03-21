@@ -11,7 +11,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const Admin = () => {
-  const [materials, setMaterials] = useState<StudyMaterial[]>(sampleMaterials);
+  const { isAdmin } = useAuth();
+  const [materials, setMaterials] = useState<StudyMaterial[]>([]);
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
