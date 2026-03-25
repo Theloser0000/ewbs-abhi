@@ -41,6 +41,21 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Creator section */}
+      <section className="border-t py-12">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-sm font-medium text-muted-foreground">Created by</p>
+          <a
+            href="https://theloser0000.github.io/abhi/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-block font-serif text-lg text-primary underline-offset-4 hover:underline"
+          >
+            Abhi — View Portfolio
+          </a>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">

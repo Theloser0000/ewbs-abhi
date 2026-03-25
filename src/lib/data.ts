@@ -9,15 +9,6 @@ export interface StudyMaterial {
   downloads: number;
 }
 
-export const subjects = [
-  'Mathematics',
-  'Physics',
-  'Chemistry',
-  'Biology',
-  'Computer Science',
-  'English',
-  'History',
-  'Economics',
-] as const;
+export const subjects: string[] = [];
 
 export const sampleMaterials: StudyMaterial[] = [];
