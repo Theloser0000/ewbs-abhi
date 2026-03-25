@@ -3,9 +3,9 @@ import { ArrowRight, BookOpen, Users, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const stats = [
-  { icon: FileDown, value: '1,900+', label: 'Downloads' },
-  { icon: BookOpen, value: '8', label: 'Subjects' },
-  { icon: Users, value: '420+', label: 'Students' },
+  { icon: FileDown, value: '00 ', label: 'Downloads' },
+  { icon: BookOpen, value: '00', label: 'Subjects' },
+  { icon: Users, value: '00', label: 'Students' },
 ];
 
 const HeroSection = () => {
