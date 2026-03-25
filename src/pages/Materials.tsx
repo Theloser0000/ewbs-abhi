@@ -1,17 +1,47 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import MaterialCard from '@/components/MaterialCard';
-import SubjectFilter from '@/components/SubjectFilter';
-import { sampleMaterials } from '@/lib/data';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Material {
+  id: string;
+  title: string;
+  subject: string;
+  description: string;
+  type: string;
+  file_size: string | null;
+  file_path: string | null;
+  downloads: number;
+  created_at: string;
+}
 
 const Materials = () => {
   const [search, setSearch] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [materials, setMaterials] = useState<Material[]>([]);
+
+  useEffect(() => {
+    const fetchMaterials = async () => {
+      const { data } = await supabase
+        .from('materials')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (data) setMaterials(data);
+    };
+    fetchMaterials();
+  }, []);
+
+  // Get unique subjects from materials
+  const subjects = useMemo(() => {
+    const unique = [...new Set(materials.map((m) => m.subject))];
+    return unique.sort();
+  }, [materials]);
 
   const filtered = useMemo(() => {
-    return sampleMaterials.filter((m) => {
+    return materials.filter((m) => {
       const matchesSearch =
         !search ||
         m.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -19,7 +49,7 @@ const Materials = () => {
       const matchesSubject = !selectedSubject || m.subject === selectedSubject;
       return matchesSearch && matchesSubject;
     });
-  }, [search, selectedSubject]);
+  }, [search, selectedSubject, materials]);
 
   return (
     <div className="min-h-screen">
@@ -40,9 +70,25 @@ const Materials = () => {
           />
         </div>
 
-        {/* Filters */}
-        <div className="mt-5">
-          <SubjectFilter selected={selectedSubject} onSelect={setSelectedSubject} />
+        {/* Subject filters (dynamic from uploaded materials) */}
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button
+            variant={selectedSubject === null ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedSubject(null)}
+          >
+            All
+          </Button>
+          {subjects.map((subject) => (
+            <Button
+              key={subject}
+              variant={selectedSubject === subject ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedSubject(subject)}
+            >
+              {subject}
+            </Button>
+          ))}
         </div>
 
         {/* Results */}

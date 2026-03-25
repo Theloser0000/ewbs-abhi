@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Upload, Trash2, FileText } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -6,45 +6,112 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { type StudyMaterial } from '@/lib/data';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+interface Material {
+  id: string;
+  title: string;
+  subject: string;
+  description: string;
+  type: string;
+  file_size: string | null;
+  file_path: string | null;
+  downloads: number;
+  created_at: string;
+}
 
 const Admin = () => {
   const { isAdmin } = useAuth();
-  const [materials, setMaterials] = useState<StudyMaterial[]>([]);
+  const [materials, setMaterials] = useState<Material[]>([]);
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [fileType, setFileType] = useState<'pdf' | 'notes' | 'slides'>('pdf');
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
-  const handleUpload = () => {
+  const fetchMaterials = async () => {
+    const { data } = await supabase
+      .from('materials')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (data) setMaterials(data);
+  };
+
+  useEffect(() => {
+    if (isAdmin) fetchMaterials();
+  }, [isAdmin]);
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const handleUpload = async () => {
     if (!title || !subject || !description) {
       toast.error('Please fill in all fields');
       return;
     }
+    if (!file) {
+      toast.error('Please select a file to upload');
+      return;
+    }
 
-    const newMaterial: StudyMaterial = {
-      id: Date.now().toString(),
-      title,
-      subject,
-      description,
-      type: fileType,
-      uploadedAt: new Date().toISOString().split('T')[0],
-      fileSize: '1.2 MB',
-      downloads: 0,
-    };
+    setUploading(true);
+    try {
+      // Upload file to storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${file.name}`;
+      const { error: storageError } = await supabase.storage
+        .from('materials')
+        .upload(fileName, file);
 
-    setMaterials((prev) => [newMaterial, ...prev]);
-    setTitle('');
-    setSubject('');
-    setDescription('');
-    toast.success('Material uploaded successfully!');
+      if (storageError) throw storageError;
+
+      // Insert record into database
+      const { error: dbError } = await supabase.from('materials').insert({
+        title,
+        subject,
+        description,
+        type: fileType,
+        file_size: formatFileSize(file.size),
+        file_path: fileName,
+      });
+
+      if (dbError) throw dbError;
+
+      toast.success('Material uploaded successfully!');
+      setTitle('');
+      setSubject('');
+      setDescription('');
+      setFile(null);
+      // Reset file input
+      const fileInput = document.getElementById('file-input') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+      fetchMaterials();
+    } catch (error: any) {
+      toast.error(error.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setMaterials((prev) => prev.filter((m) => m.id !== id));
+  const handleDelete = async (material: Material) => {
+    // Delete file from storage
+    if (material.file_path) {
+      await supabase.storage.from('materials').remove([material.file_path]);
+    }
+    // Delete record from database
+    const { error } = await supabase.from('materials').delete().eq('id', material.id);
+    if (error) {
+      toast.error('Failed to delete');
+      return;
+    }
     toast.success('Material deleted');
+    fetchMaterials();
   };
 
   if (!isAdmin) return <Navigate to="/login" replace />;
@@ -109,9 +176,19 @@ const Admin = () => {
               />
             </div>
 
-            <Button onClick={handleUpload} className="w-full gap-2">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">File</label>
+              <Input
+                id="file-input"
+                type="file"
+                accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+              />
+            </div>
+
+            <Button onClick={handleUpload} className="w-full gap-2" disabled={uploading}>
               <Upload className="h-4 w-4" />
-              Upload Material
+              {uploading ? 'Uploading...' : 'Upload Material'}
             </Button>
           </div>
         </div>
@@ -133,14 +210,14 @@ const Admin = () => {
                   <div>
                     <p className="text-sm font-medium text-foreground">{m.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {m.subject} · {m.type.toUpperCase()} · {m.fileSize}
+                      {m.subject} · {m.type.toUpperCase()} · {m.file_size || 'N/A'}
                     </p>
                   </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleDelete(m.id)}
+                  onClick={() => handleDelete(m)}
                   className="text-muted-foreground hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
