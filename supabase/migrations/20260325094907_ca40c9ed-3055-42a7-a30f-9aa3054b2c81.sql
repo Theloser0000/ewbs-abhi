@@ -1,0 +1,1 @@
+CREATE POLICY "Allow material updates" ON public.materials FOR UPDATE TO public USING (true) WITH CHECK (true);
