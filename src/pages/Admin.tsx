@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type StudyMaterial } from '@/lib/data';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
