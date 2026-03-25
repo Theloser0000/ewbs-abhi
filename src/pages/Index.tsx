@@ -56,18 +56,31 @@ const Index = () => {
         </section>
       )}
 
-      {/* Creator section */}
-      <section className="border-t py-12">
+      {/* College & Links section */}
+      <section className="border-t bg-secondary/30 py-12">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sm font-medium text-muted-foreground">Created by</p>
-          <a
-            href="https://theloser0000.github.io/abhi/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-block font-serif text-lg text-primary underline-offset-4 hover:underline"
-          >
-            Abhi — View Portfolio
-          </a>
+          <h2 className="font-serif text-xl text-foreground md:text-2xl">
+            EAST WEST BUSINESS SCHOOL
+          </h2>
+
+          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
+            <a
+              href="http://abhishekck.infinityfreeapp.com/index.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-lg border bg-card px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-secondary"
+            >
+              📝 Request Textbook / Write Complaint
+            </a>
+            <a
+              href="https://theloser0000.github.io/abhi/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-primary underline-offset-4 hover:underline"
+            >
+              Created by Abhi — View Portfolio
+            </a>
+          </div>
         </div>
       </section>
 

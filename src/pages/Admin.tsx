@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Upload, Trash2, FileText } from 'lucide-react';
+import { Upload, Trash2, FileText, Pencil, Check, X } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +31,8 @@ const Admin = () => {
   const [fileType, setFileType] = useState<'pdf' | 'notes' | 'slides'>('pdf');
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
 
   const fetchMaterials = async () => {
     const { data } = await supabase
@@ -100,17 +102,30 @@ const Admin = () => {
   };
 
   const handleDelete = async (material: Material) => {
-    // Delete file from storage
     if (material.file_path) {
       await supabase.storage.from('materials').remove([material.file_path]);
     }
-    // Delete record from database
     const { error } = await supabase.from('materials').delete().eq('id', material.id);
     if (error) {
       toast.error('Failed to delete');
       return;
     }
     toast.success('Material deleted');
+    fetchMaterials();
+  };
+
+  const handleRename = async (id: string) => {
+    if (!editTitle.trim()) {
+      toast.error('Title cannot be empty');
+      return;
+    }
+    const { error } = await supabase.from('materials').update({ title: editTitle.trim() }).eq('id', id);
+    if (error) {
+      toast.error('Failed to rename');
+      return;
+    }
+    toast.success('Renamed successfully');
+    setEditingId(null);
     fetchMaterials();
   };
 
@@ -205,23 +220,56 @@ const Admin = () => {
                 key={m.id}
                 className="flex items-center justify-between rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-secondary/50"
               >
-                <div className="flex items-center gap-3">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{m.title}</p>
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
+                    {editingId === m.id ? (
+                      <Input
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="h-7 text-sm"
+                        autoFocus
+                        onKeyDown={(e) => e.key === 'Enter' && handleRename(m.id)}
+                      />
+                    ) : (
+                      <p className="text-sm font-medium text-foreground truncate">{m.title}</p>
+                    )}
                     <p className="text-xs text-muted-foreground">
                       {m.subject} · {m.type.toUpperCase()} · {m.file_size || 'N/A'}
                     </p>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(m)}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  {editingId === m.id ? (
+                    <>
+                      <Button variant="ghost" size="icon" onClick={() => handleRename(m.id)} className="text-primary">
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => setEditingId(null)} className="text-muted-foreground">
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => { setEditingId(m.id); setEditTitle(m.title); }}
+                        className="text-muted-foreground hover:text-primary"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(m)}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>
