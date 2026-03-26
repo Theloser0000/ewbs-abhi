@@ -24,9 +24,14 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2.5 font-serif text-xl text-foreground">
-          <BookOpen className="h-6 w-6 text-primary" />
-          StudyShare
+        <Link to="/" className="flex flex-col items-start leading-tight">
+          <span className="flex items-center gap-2 font-serif text-lg text-foreground">
+            <BookOpen className="h-5 w-5 text-primary" />
+            StudyShare
+          </span>
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            East West Business School
+          </span>
         </Link>
 
         {/* Desktop */}

@@ -4,6 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 const typeConfig: Record<string, { icon: typeof FileText; label: string; color: string }> = {
+  Textbook: { icon: FileText, label: 'Textbook', color: 'text-primary' },
+  'Question Paper': { icon: StickyNote, label: 'Question Paper', color: 'text-destructive' },
+  Other: { icon: Presentation, label: 'Other', color: 'text-accent' },
   pdf: { icon: FileText, label: 'PDF', color: 'text-destructive' },
   notes: { icon: StickyNote, label: 'Notes', color: 'text-accent' },
   slides: { icon: Presentation, label: 'Slides', color: 'text-primary' },
