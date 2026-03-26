@@ -28,7 +28,7 @@ const Admin = () => {
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
-  const [fileType, setFileType] = useState<'pdf' | 'notes' | 'slides'>('pdf');
+  const [fileType, setFileType] = useState('Textbook');
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -167,15 +167,15 @@ const Admin = () => {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-foreground">Type</label>
-                <Select value={fileType} onValueChange={(v) => setFileType(v as 'pdf' | 'notes' | 'slides')}>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Category</label>
+                <Select value={fileType} onValueChange={(v) => setFileType(v)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pdf">PDF</SelectItem>
-                    <SelectItem value="notes">Notes</SelectItem>
-                    <SelectItem value="slides">Slides</SelectItem>
+                    <SelectItem value="Textbook">Textbook</SelectItem>
+                    <SelectItem value="Question Paper">Question Paper</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
