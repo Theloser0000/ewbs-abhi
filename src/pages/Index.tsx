@@ -87,7 +87,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 StudyShare. Built for students, by students.
+          © 2026 StudyShare. Built for students, by student.
         </div>
       </footer>
     </div>
