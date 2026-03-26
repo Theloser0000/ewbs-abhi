@@ -22,6 +22,7 @@ export type Database = {
           file_path: string | null
           file_size: string | null
           id: string
+          semester: number
           subject: string
           title: string
           type: string
@@ -33,6 +34,7 @@ export type Database = {
           file_path?: string | null
           file_size?: string | null
           id?: string
+          semester?: number
           subject: string
           title: string
           type: string
@@ -44,6 +46,7 @@ export type Database = {
           file_path?: string | null
           file_size?: string | null
           id?: string
+          semester?: number
           subject?: string
           title?: string
           type?: string
