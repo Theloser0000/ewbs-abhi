@@ -252,7 +252,7 @@ const Admin = () => {
                       <p className="text-sm font-medium text-foreground truncate">{m.title}</p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      {m.subject} · {m.type.toUpperCase()} · {m.file_size || 'N/A'}
+                      Sem {m.semester} · {m.subject} · {m.type} · {m.file_size || 'N/A'}
                     </p>
                   </div>
                 </div>
