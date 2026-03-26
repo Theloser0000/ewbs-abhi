@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       materials: {
         Row: {
+          course: string
           created_at: string
           description: string
           downloads: number
@@ -28,6 +29,7 @@ export type Database = {
           type: string
         }
         Insert: {
+          course?: string
           created_at?: string
           description: string
           downloads?: number
@@ -40,6 +42,7 @@ export type Database = {
           type: string
         }
         Update: {
+          course?: string
           created_at?: string
           description?: string
           downloads?: number

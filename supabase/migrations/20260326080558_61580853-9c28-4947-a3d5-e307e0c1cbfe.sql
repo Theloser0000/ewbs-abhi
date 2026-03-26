@@ -1,0 +1,1 @@
+ALTER TABLE public.materials ADD COLUMN course text NOT NULL DEFAULT 'Other';

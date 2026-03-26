@@ -21,7 +21,10 @@ interface Material {
   downloads: number;
   created_at: string;
   semester: number;
+  course: string;
 }
+
+const courses = ['BCA', 'BCom', 'BSc', 'PUC', 'BA', 'Other'];
 
 const Admin = () => {
   const { isAdmin } = useAuth();
@@ -30,6 +33,7 @@ const Admin = () => {
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [fileType, setFileType] = useState('Textbook');
+  const [course, setCourse] = useState('BCA');
   const [semester, setSemester] = useState('1');
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -41,7 +45,7 @@ const Admin = () => {
       .from('materials')
       .select('*')
       .order('created_at', { ascending: false });
-    if (data) setMaterials(data);
+    if (data) setMaterials(data as Material[]);
   };
 
   useEffect(() => {
@@ -66,8 +70,6 @@ const Admin = () => {
 
     setUploading(true);
     try {
-      // Upload file to storage
-      const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${file.name}`;
       const { error: storageError } = await supabase.storage
         .from('materials')
@@ -75,12 +77,12 @@ const Admin = () => {
 
       if (storageError) throw storageError;
 
-      // Insert record into database
       const { error: dbError } = await supabase.from('materials').insert({
         title,
         subject,
         description,
         type: fileType,
+        course,
         semester: parseInt(semester),
         file_size: formatFileSize(file.size),
         file_path: fileName,
@@ -93,7 +95,6 @@ const Admin = () => {
       setSubject('');
       setDescription('');
       setFile(null);
-      // Reset file input
       const fileInput = document.getElementById('file-input') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
       fetchMaterials();
@@ -143,7 +144,7 @@ const Admin = () => {
         <p className="mt-2 text-muted-foreground">Upload and manage study materials</p>
 
         {/* Upload form */}
-        <div className="mt-8 max-w-lg rounded-xl border bg-card p-6 shadow-sm">
+        <div className="mt-8 max-w-xl rounded-xl border bg-card p-6 shadow-sm">
           <h2 className="mb-4 flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
             <Upload className="h-5 w-5 text-primary" />
             Upload New Material
@@ -159,7 +160,21 @@ const Admin = () => {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Course</label>
+                <Select value={course} onValueChange={(v) => setCourse(v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {courses.map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Semester</label>
                 <Select value={semester} onValueChange={(v) => setSemester(v)}>
@@ -173,7 +188,9 @@ const Admin = () => {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
 
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Subject</label>
                 <Input
@@ -252,7 +269,7 @@ const Admin = () => {
                       <p className="text-sm font-medium text-foreground truncate">{m.title}</p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      Sem {m.semester} · {m.subject} · {m.type} · {m.file_size || 'N/A'}
+                      {m.course} · Sem {m.semester} · {m.subject} · {m.type} · {m.file_size || 'N/A'}
                     </p>
                   </div>
                 </div>
