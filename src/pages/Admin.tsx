@@ -20,6 +20,7 @@ interface Material {
   file_path: string | null;
   downloads: number;
   created_at: string;
+  semester: number;
 }
 
 const Admin = () => {
@@ -29,6 +30,7 @@ const Admin = () => {
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [fileType, setFileType] = useState('Textbook');
+  const [semester, setSemester] = useState('1');
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -79,6 +81,7 @@ const Admin = () => {
         subject,
         description,
         type: fileType,
+        semester: parseInt(semester),
         file_size: formatFileSize(file.size),
         file_path: fileName,
       });
@@ -156,11 +159,25 @@ const Admin = () => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Semester</label>
+                <Select value={semester} onValueChange={(v) => setSemester(v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6].map((s) => (
+                      <SelectItem key={s} value={String(s)}>Semester {s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Subject</label>
                 <Input
-                  placeholder="e.g. Mathematics, Physics"
+                  placeholder="e.g. Mathematics"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                 />
@@ -235,7 +252,7 @@ const Admin = () => {
                       <p className="text-sm font-medium text-foreground truncate">{m.title}</p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      {m.subject} · {m.type.toUpperCase()} · {m.file_size || 'N/A'}
+                      Sem {m.semester} · {m.subject} · {m.type} · {m.file_size || 'N/A'}
                     </p>
                   </div>
                 </div>
