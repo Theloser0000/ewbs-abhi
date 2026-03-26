@@ -22,7 +22,7 @@ const HeroSection = () => {
             Study smarter, share knowledge
           </h1>
           <p className="mx-auto mt-5 max-w-lg animate-fade-up stagger-2 text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
-            Access quality notes, PDFs, and study materials shared by students across every subject.
+            Access quality textbooks , PDFs, and study materials across every subject and also request the materials in below link .
           </p>
 
           <div className="mt-8 flex animate-fade-up stagger-3 flex-wrap justify-center gap-3">
