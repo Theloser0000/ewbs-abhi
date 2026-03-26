@@ -18,9 +18,12 @@ interface Material {
   created_at: string;
 }
 
+const categories = ['Textbook', 'Question Paper', 'Other'];
+
 const Materials = () => {
   const [search, setSearch] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [materials, setMaterials] = useState<Material[]>([]);
 
   useEffect(() => {
@@ -47,9 +50,10 @@ const Materials = () => {
         m.title.toLowerCase().includes(search.toLowerCase()) ||
         m.description.toLowerCase().includes(search.toLowerCase());
       const matchesSubject = !selectedSubject || m.subject === selectedSubject;
-      return matchesSearch && matchesSubject;
+      const matchesCategory = !selectedCategory || m.type === selectedCategory;
+      return matchesSearch && matchesSubject && matchesCategory;
     });
-  }, [search, selectedSubject, materials]);
+  }, [search, selectedSubject, selectedCategory, materials]);
 
   return (
     <div className="min-h-screen">
@@ -70,26 +74,49 @@ const Materials = () => {
           />
         </div>
 
-        {/* Subject filters (dynamic from uploaded materials) */}
+        {/* Category tabs */}
         <div className="mt-5 flex flex-wrap gap-2">
           <Button
-            variant={selectedSubject === null ? 'default' : 'outline'}
+            variant={selectedCategory === null ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setSelectedSubject(null)}
+            onClick={() => setSelectedCategory(null)}
           >
             All
           </Button>
-          {subjects.map((subject) => (
+          {categories.map((cat) => (
             <Button
-              key={subject}
-              variant={selectedSubject === subject ? 'default' : 'outline'}
+              key={cat}
+              variant={selectedCategory === cat ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setSelectedSubject(subject)}
+              onClick={() => setSelectedCategory(cat)}
             >
-              {subject}
+              {cat}
             </Button>
           ))}
         </div>
+
+        {/* Subject filters (dynamic from uploaded materials) */}
+        {subjects.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              variant={selectedSubject === null ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setSelectedSubject(null)}
+            >
+              All Subjects
+            </Button>
+            {subjects.map((subject) => (
+              <Button
+                key={subject}
+                variant={selectedSubject === subject ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setSelectedSubject(subject)}
+              >
+                {subject}
+              </Button>
+            ))}
+          </div>
+        )}
 
         {/* Results */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

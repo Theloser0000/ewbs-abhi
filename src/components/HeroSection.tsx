@@ -1,12 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookOpen, Users, FileDown } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-const stats = [
-  { icon: FileDown, value: '00 ', label: 'Downloads' },
-  { icon: BookOpen, value: '00', label: 'Subjects' },
-  { icon: Users, value: '00', label: 'Students' },
-];
 
 const HeroSection = () => {
   return (
@@ -46,16 +40,6 @@ const HeroSection = () => {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="mx-auto mt-16 grid max-w-md animate-fade-up stagger-4 grid-cols-3 gap-6">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <stat.icon className="mx-auto mb-2 h-5 w-5 text-primary" />
-              <p className="font-sans text-xl font-bold tabular-nums text-foreground">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );
