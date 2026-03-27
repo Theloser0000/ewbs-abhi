@@ -6,20 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-interface Material {
-  id: string;
-  title: string;
-  subject: string;
-  description: string;
-  type: string;
-  file_size: string | null;
-  file_path: string | null;
-  downloads: number;
-  created_at: string;
-  semester: number;
-  course: string;
-}
+import type { Material } from '@/types/material';
 
 const courses = [
   { name: 'BCA', icon: '💻', desc: 'Bachelor of Computer Applications' },
@@ -44,10 +31,12 @@ const Materials = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMaterials = async () => {
       setLoading(true);
+      setLoadError(null);
       try {
         const { data, error } = await supabase
           .from('materials')
@@ -55,9 +44,10 @@ const Materials = () => {
           .order('created_at', { ascending: false });
         if (error) throw error;
         if (data) setMaterials(data as Material[]);
-      } catch (err: any) {
+      } catch {
+        setMaterials([]);
+        setLoadError('Unable to load materials right now. Please try again.');
         toast.error('Failed to load materials');
-        console.error('Fetch error:', err);
       } finally {
         setLoading(false);
       }
@@ -137,6 +127,24 @@ const Materials = () => {
         <div className="flex items-center justify-center py-32">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="ml-3 text-muted-foreground">Loading materials...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <p className="text-lg font-medium text-foreground">{loadError}</p>
+          <p className="mt-2 text-sm text-muted-foreground">No data available</p>
+          <Button
+            className="mt-5"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </Button>
         </div>
       </div>
     );
@@ -229,7 +237,7 @@ const Materials = () => {
               </h2>
             </div>
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 max-w-2xl">
-              {[1, 2, 3].map((year) => {
+              {(years.length > 0 ? years : [1, 2, 3]).map((year) => {
                 const [s1, s2] = getSemestersForYear(year);
                 const count = materials.filter(
                   (m) => m.course === selectedCourse && (m.semester === s1 || m.semester === s2)
