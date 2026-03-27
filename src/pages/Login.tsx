@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -13,10 +13,11 @@ const Login = () => {
   const { login, isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  if (isAdmin) {
-    navigate('/admin');
-    return null;
-  }
+  useEffect(() => {
+    if (isAdmin) {
+      navigate('/admin', { replace: true });
+    }
+  }, [isAdmin, navigate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +28,8 @@ const Login = () => {
       toast.error('Invalid username or password');
     }
   };
+
+  if (isAdmin) return null;
 
   return (
     <div className="min-h-screen">

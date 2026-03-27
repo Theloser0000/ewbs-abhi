@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Upload, Trash2, FileText, Pencil, Check, X } from 'lucide-react';
+import { Upload, Trash2, FileText, Pencil, Check, X, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,7 @@ const courses = ['BCA', 'BCom', 'BSc', 'PUC', 'BA', 'Other'];
 const Admin = () => {
   const { isAdmin } = useAuth();
   const [materials, setMaterials] = useState<Material[]>([]);
+  const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
@@ -41,11 +42,20 @@ const Admin = () => {
   const [editTitle, setEditTitle] = useState('');
 
   const fetchMaterials = async () => {
-    const { data } = await supabase
-      .from('materials')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (data) setMaterials(data as Material[]);
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('materials')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data) setMaterials(data as Material[]);
+    } catch (err: any) {
+      toast.error('Failed to load materials');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -59,7 +69,7 @@ const Admin = () => {
   };
 
   const handleUpload = async () => {
-    if (!title || !subject || !description) {
+    if (!title.trim() || !subject.trim() || !description.trim()) {
       toast.error('Please fill in all fields');
       return;
     }
@@ -78,9 +88,9 @@ const Admin = () => {
       if (storageError) throw storageError;
 
       const { error: dbError } = await supabase.from('materials').insert({
-        title,
-        subject,
-        description,
+        title: title.trim(),
+        subject: subject.trim(),
+        description: description.trim(),
         type: fileType,
         course,
         semester: parseInt(semester),
@@ -100,22 +110,25 @@ const Admin = () => {
       fetchMaterials();
     } catch (error: any) {
       toast.error(error.message || 'Upload failed');
+      console.error('Upload error:', error);
     } finally {
       setUploading(false);
     }
   };
 
   const handleDelete = async (material: Material) => {
-    if (material.file_path) {
-      await supabase.storage.from('materials').remove([material.file_path]);
-    }
-    const { error } = await supabase.from('materials').delete().eq('id', material.id);
-    if (error) {
+    try {
+      if (material.file_path) {
+        await supabase.storage.from('materials').remove([material.file_path]);
+      }
+      const { error } = await supabase.from('materials').delete().eq('id', material.id);
+      if (error) throw error;
+      toast.success('Material deleted');
+      fetchMaterials();
+    } catch (err: any) {
       toast.error('Failed to delete');
-      return;
+      console.error(err);
     }
-    toast.success('Material deleted');
-    fetchMaterials();
   };
 
   const handleRename = async (id: string) => {
@@ -123,14 +136,16 @@ const Admin = () => {
       toast.error('Title cannot be empty');
       return;
     }
-    const { error } = await supabase.from('materials').update({ title: editTitle.trim() }).eq('id', id);
-    if (error) {
+    try {
+      const { error } = await supabase.from('materials').update({ title: editTitle.trim() }).eq('id', id);
+      if (error) throw error;
+      toast.success('Renamed successfully');
+      setEditingId(null);
+      fetchMaterials();
+    } catch (err: any) {
       toast.error('Failed to rename');
-      return;
+      console.error(err);
     }
-    toast.success('Renamed successfully');
-    setEditingId(null);
-    fetchMaterials();
   };
 
   if (!isAdmin) return <Navigate to="/login" replace />;
@@ -163,7 +178,7 @@ const Admin = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Course</label>
-                <Select value={course} onValueChange={(v) => setCourse(v)}>
+                <Select value={course} onValueChange={setCourse}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -177,7 +192,7 @@ const Admin = () => {
 
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Semester</label>
-                <Select value={semester} onValueChange={(v) => setSemester(v)}>
+                <Select value={semester} onValueChange={setSemester}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -202,7 +217,7 @@ const Admin = () => {
 
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Category</label>
-                <Select value={fileType} onValueChange={(v) => setFileType(v)}>
+                <Select value={fileType} onValueChange={setFileType}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -230,13 +245,20 @@ const Admin = () => {
               <Input
                 id="file-input"
                 type="file"
-                accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+                accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.webp"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
               />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Supported: PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, PNG, WEBP
+              </p>
             </div>
 
             <Button onClick={handleUpload} className="w-full gap-2" disabled={uploading}>
-              <Upload className="h-4 w-4" />
+              {uploading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
               {uploading ? 'Uploading...' : 'Upload Material'}
             </Button>
           </div>
@@ -248,65 +270,74 @@ const Admin = () => {
             All Materials ({materials.length})
           </h2>
 
-          <div className="space-y-2">
-            {materials.map((m) => (
-              <div
-                key={m.id}
-                className="flex items-center justify-between rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-secondary/50"
-              >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0 flex-1">
+          {loading ? (
+            <div className="flex items-center gap-2 py-8 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Loading materials...
+            </div>
+          ) : materials.length === 0 ? (
+            <p className="py-8 text-center text-muted-foreground">No materials uploaded yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {materials.map((m) => (
+                <div
+                  key={m.id}
+                  className="flex items-center justify-between rounded-lg border bg-card px-4 py-3 transition-colors hover:bg-secondary/50"
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      {editingId === m.id ? (
+                        <Input
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          className="h-7 text-sm"
+                          autoFocus
+                          onKeyDown={(e) => e.key === 'Enter' && handleRename(m.id)}
+                        />
+                      ) : (
+                        <p className="text-sm font-medium text-foreground truncate">{m.title}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        {m.course} · Sem {m.semester} · {m.subject} · {m.type} · {m.file_size || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
                     {editingId === m.id ? (
-                      <Input
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                        className="h-7 text-sm"
-                        autoFocus
-                        onKeyDown={(e) => e.key === 'Enter' && handleRename(m.id)}
-                      />
+                      <>
+                        <Button variant="ghost" size="icon" onClick={() => handleRename(m.id)} className="text-primary">
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => setEditingId(null)} className="text-muted-foreground">
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </>
                     ) : (
-                      <p className="text-sm font-medium text-foreground truncate">{m.title}</p>
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => { setEditingId(m.id); setEditTitle(m.title); }}
+                          className="text-muted-foreground hover:text-primary"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(m)}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
                     )}
-                    <p className="text-xs text-muted-foreground">
-                      {m.course} · Sem {m.semester} · {m.subject} · {m.type} · {m.file_size || 'N/A'}
-                    </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  {editingId === m.id ? (
-                    <>
-                      <Button variant="ghost" size="icon" onClick={() => handleRename(m.id)} className="text-primary">
-                        <Check className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => setEditingId(null)} className="text-muted-foreground">
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => { setEditingId(m.id); setEditTitle(m.title); }}
-                        className="text-muted-foreground hover:text-primary"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(m)}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
