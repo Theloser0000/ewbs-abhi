@@ -153,7 +153,7 @@ const Materials = () => {
         {/* Breadcrumb */}
         {selectedCourse && (
           <div className="mt-4 flex items-center gap-1.5 text-sm">
-            <button onClick={() => handleSelectCourse('')} className="text-primary hover:underline">
+            <button onClick={() => { setSelectedCourse(null); setSelectedYear(null); setSelectedSemester(null); setSelectedSubject(null); setSelectedCategory(null); }} className="text-primary hover:underline">
               All Courses
             </button>
             {selectedCourse && (
