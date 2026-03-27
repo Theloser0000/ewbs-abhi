@@ -5,24 +5,12 @@ import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { Material } from '@/types/material';
 
-interface Material {
-  id: string;
-  title: string;
-  subject: string;
-  description: string;
-  type: string;
-  file_size: string | null;
-  file_path: string | null;
-  downloads: number;
-  created_at: string;
-  semester: number;
-  course: string;
-}
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
 const courses = ['BCA', 'BCom', 'BSc', 'PUC', 'BA', 'Other'];
 
@@ -50,9 +38,8 @@ const Admin = () => {
         .order('created_at', { ascending: false });
       if (error) throw error;
       if (data) setMaterials(data as Material[]);
-    } catch (err: any) {
+    } catch {
       toast.error('Failed to load materials');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -78,14 +65,21 @@ const Admin = () => {
       return;
     }
 
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error('File too large. Max allowed size is 20MB.');
+      return;
+    }
+
     setUploading(true);
+    let uploadedFilePath: string | null = null;
     try {
-      const fileName = `${Date.now()}-${file.name}`;
+      const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
       const { error: storageError } = await supabase.storage
         .from('materials')
         .upload(fileName, file);
 
       if (storageError) throw storageError;
+      uploadedFilePath = fileName;
 
       const { error: dbError } = await supabase.from('materials').insert({
         title: title.trim(),
@@ -98,7 +92,12 @@ const Admin = () => {
         file_path: fileName,
       });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        if (uploadedFilePath) {
+          await supabase.storage.from('materials').remove([uploadedFilePath]);
+        }
+        throw dbError;
+      }
 
       toast.success('Material uploaded successfully!');
       setTitle('');
@@ -109,8 +108,11 @@ const Admin = () => {
       if (fileInput) fileInput.value = '';
       fetchMaterials();
     } catch (error: any) {
-      toast.error(error.message || 'Upload failed');
-      console.error('Upload error:', error);
+      if (error?.code === '23514') {
+        toast.error('Invalid category value. Use Textbook, Question Paper, or Other.');
+      } else {
+        toast.error(error?.message || 'Upload failed');
+      }
     } finally {
       setUploading(false);
     }
@@ -119,15 +121,15 @@ const Admin = () => {
   const handleDelete = async (material: Material) => {
     try {
       if (material.file_path) {
-        await supabase.storage.from('materials').remove([material.file_path]);
+        const { error: storageDeleteError } = await supabase.storage.from('materials').remove([material.file_path]);
+        if (storageDeleteError) throw storageDeleteError;
       }
       const { error } = await supabase.from('materials').delete().eq('id', material.id);
       if (error) throw error;
       toast.success('Material deleted');
       fetchMaterials();
-    } catch (err: any) {
+    } catch {
       toast.error('Failed to delete');
-      console.error(err);
     }
   };
 
@@ -142,9 +144,8 @@ const Admin = () => {
       toast.success('Renamed successfully');
       setEditingId(null);
       fetchMaterials();
-    } catch (err: any) {
+    } catch {
       toast.error('Failed to rename');
-      console.error(err);
     }
   };
 
@@ -178,30 +179,28 @@ const Admin = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Course</label>
-                <Select value={course} onValueChange={setCourse}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {courses.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  value={course}
+                  onChange={(e) => setCourse(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  {courses.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Semester</label>
-                <Select value={semester} onValueChange={setSemester}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[1, 2, 3, 4, 5, 6].map((s) => (
-                      <SelectItem key={s} value={String(s)}>Semester {s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  value={semester}
+                  onChange={(e) => setSemester(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  {[1, 2, 3, 4, 5, 6].map((s) => (
+                    <option key={s} value={String(s)}>Semester {s}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -217,16 +216,15 @@ const Admin = () => {
 
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-foreground">Category</label>
-                <Select value={fileType} onValueChange={setFileType}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Textbook">Textbook</SelectItem>
-                    <SelectItem value="Question Paper">Question Paper</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select
+                  value={fileType}
+                  onChange={(e) => setFileType(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="Textbook">Textbook</option>
+                  <option value="Question Paper">Question Paper</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
             </div>
 
