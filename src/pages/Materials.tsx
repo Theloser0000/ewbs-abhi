@@ -6,20 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-interface Material {
-  id: string;
-  title: string;
-  subject: string;
-  description: string;
-  type: string;
-  file_size: string | null;
-  file_path: string | null;
-  downloads: number;
-  created_at: string;
-  semester: number;
-  course: string;
-}
+import type { Material } from '@/types/material';
 
 const courses = [
   { name: 'BCA', icon: '💻', desc: 'Bachelor of Computer Applications' },
