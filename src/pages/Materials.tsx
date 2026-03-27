@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Search, BookOpen, ChevronRight, GraduationCap, Calendar, Layers } from 'lucide-react';
+import { Search, BookOpen, ChevronRight, GraduationCap, Calendar, Layers, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import MaterialCard from '@/components/MaterialCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Material {
   id: string;
@@ -31,7 +32,6 @@ const courses = [
 
 const categories = ['Textbook', 'Question Paper', 'Other'];
 
-// Derive year from semester
 const getYear = (sem: number) => Math.ceil(sem / 2);
 const getSemestersForYear = (year: number) => [year * 2 - 1, year * 2];
 
@@ -43,19 +43,28 @@ const Materials = () => {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [materials, setMaterials] = useState<Material[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMaterials = async () => {
-      const { data } = await supabase
-        .from('materials')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (data) setMaterials(data as Material[]);
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('materials')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        if (data) setMaterials(data as Material[]);
+      } catch (err: any) {
+        toast.error('Failed to load materials');
+        console.error('Fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchMaterials();
   }, []);
 
-  // Available years for selected course
   const years = useMemo(() => {
     if (!selectedCourse) return [];
     const courseMats = materials.filter((m) => m.course === selectedCourse);
@@ -63,16 +72,6 @@ const Materials = () => {
     return unique.sort();
   }, [materials, selectedCourse]);
 
-  // Available semesters for selected year
-  const semesters = useMemo(() => {
-    if (!selectedCourse || selectedYear === null) return [];
-    const [s1, s2] = getSemestersForYear(selectedYear);
-    const courseMats = materials.filter((m) => m.course === selectedCourse);
-    const available = [s1, s2].filter((s) => courseMats.some((m) => m.semester === s));
-    return available;
-  }, [materials, selectedCourse, selectedYear]);
-
-  // Subjects for selected semester
   const subjects = useMemo(() => {
     if (!selectedCourse || selectedSemester === null) return [];
     const filtered = materials.filter(
@@ -81,7 +80,6 @@ const Materials = () => {
     return [...new Set(filtered.map((m) => m.subject))].sort();
   }, [materials, selectedCourse, selectedSemester]);
 
-  // Final filtered materials
   const filtered = useMemo(() => {
     return materials.filter((m) => {
       if (selectedCourse && m.course !== selectedCourse) return false;
@@ -96,20 +94,53 @@ const Materials = () => {
     });
   }, [search, selectedCourse, selectedSemester, selectedSubject, selectedCategory, materials]);
 
-  // Count materials per course
   const courseCount = (name: string) => materials.filter((m) => m.course === name).length;
 
-  const goBack = () => {
-    if (selectedSubject) setSelectedSubject(null);
-    else if (selectedSemester !== null) { setSelectedSemester(null); setSelectedSubject(null); }
-    else if (selectedYear !== null) { setSelectedYear(null); setSelectedSemester(null); }
-    else if (selectedCourse) { setSelectedCourse(null); setSelectedYear(null); }
+  const handleSelectCourse = (name: string) => {
+    setSelectedCourse(name);
+    setSelectedYear(null);
+    setSelectedSemester(null);
+    setSelectedSubject(null);
+    setSelectedCategory(null);
   };
 
-  // Reset downstream filters on upstream change
-  useEffect(() => { setSelectedYear(null); setSelectedSemester(null); setSelectedSubject(null); setSelectedCategory(null); }, [selectedCourse]);
-  useEffect(() => { setSelectedSemester(null); setSelectedSubject(null); }, [selectedYear]);
-  useEffect(() => { setSelectedSubject(null); }, [selectedSemester]);
+  const handleSelectYear = (year: number) => {
+    setSelectedYear(year);
+    setSelectedSemester(null);
+    setSelectedSubject(null);
+  };
+
+  const handleSelectSemester = (sem: number) => {
+    setSelectedSemester(sem);
+    setSelectedSubject(null);
+  };
+
+  const goBack = () => {
+    if (selectedSubject) {
+      setSelectedSubject(null);
+    } else if (selectedSemester !== null) {
+      setSelectedSemester(null);
+      setSelectedSubject(null);
+    } else if (selectedYear !== null) {
+      setSelectedYear(null);
+      setSelectedSemester(null);
+    } else if (selectedCourse) {
+      setSelectedCourse(null);
+      setSelectedYear(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="flex items-center justify-center py-32">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-3 text-muted-foreground">Loading materials...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -122,16 +153,20 @@ const Materials = () => {
         {/* Breadcrumb */}
         {selectedCourse && (
           <div className="mt-4 flex items-center gap-1.5 text-sm">
-            <button onClick={() => { setSelectedCourse(null); }} className="text-primary hover:underline">
+            <button onClick={() => handleSelectCourse('')} className="text-primary hover:underline">
               All Courses
             </button>
-            <ChevronRight className="h-3 w-3 text-muted-foreground" />
-            <button
-              onClick={() => { setSelectedYear(null); setSelectedSemester(null); setSelectedSubject(null); }}
-              className={selectedYear !== null ? 'text-primary hover:underline' : 'text-foreground font-medium'}
-            >
-              {selectedCourse}
-            </button>
+            {selectedCourse && (
+              <>
+                <ChevronRight className="h-3 w-3 text-muted-foreground" />
+                <button
+                  onClick={() => { setSelectedYear(null); setSelectedSemester(null); setSelectedSubject(null); }}
+                  className={selectedYear !== null ? 'text-primary hover:underline' : 'text-foreground font-medium'}
+                >
+                  {selectedCourse}
+                </button>
+              </>
+            )}
             {selectedYear !== null && (
               <>
                 <ChevronRight className="h-3 w-3 text-muted-foreground" />
@@ -169,7 +204,7 @@ const Materials = () => {
             {courses.map((c) => (
               <button
                 key={c.name}
-                onClick={() => setSelectedCourse(c.name)}
+                onClick={() => handleSelectCourse(c.name)}
                 className="group flex flex-col items-center gap-2 rounded-2xl border-2 border-border bg-card p-6 text-center transition-all duration-200 hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg"
               >
                 <span className="text-3xl">{c.icon}</span>
@@ -193,36 +228,28 @@ const Materials = () => {
                 {selectedCourse} — Select Year
               </h2>
             </div>
-            {years.length > 0 ? (
-              <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 max-w-2xl">
-                {[1, 2, 3].map((year) => {
-                  const [s1, s2] = getSemestersForYear(year);
-                  const count = materials.filter(
-                    (m) => m.course === selectedCourse && (m.semester === s1 || m.semester === s2)
-                  ).length;
-                  return (
-                    <button
-                      key={year}
-                      onClick={() => setSelectedYear(year)}
-                      className="group flex flex-col items-center gap-2 rounded-2xl border-2 border-border bg-card p-8 text-center transition-all duration-200 hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg"
-                    >
-                      <Calendar className="h-8 w-8 text-primary" />
-                      <span className="text-xl font-bold text-foreground">Year {year}</span>
-                      <span className="text-xs text-muted-foreground">Semester {s1} & {s2}</span>
-                      <span className="mt-1 rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground">
-                        {count} materials
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="mt-8 text-center">
-                <BookOpen className="mx-auto h-12 w-12 text-muted-foreground/40" />
-                <p className="mt-3 text-lg font-medium text-foreground">No materials for {selectedCourse} yet</p>
-                <p className="mt-1 text-sm text-muted-foreground">Materials will appear once the admin uploads them</p>
-              </div>
-            )}
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 max-w-2xl">
+              {[1, 2, 3].map((year) => {
+                const [s1, s2] = getSemestersForYear(year);
+                const count = materials.filter(
+                  (m) => m.course === selectedCourse && (m.semester === s1 || m.semester === s2)
+                ).length;
+                return (
+                  <button
+                    key={year}
+                    onClick={() => handleSelectYear(year)}
+                    className="group flex flex-col items-center gap-2 rounded-2xl border-2 border-border bg-card p-8 text-center transition-all duration-200 hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg"
+                  >
+                    <Calendar className="h-8 w-8 text-primary" />
+                    <span className="text-xl font-bold text-foreground">Year {year}</span>
+                    <span className="text-xs text-muted-foreground">Semester {s1} & {s2}</span>
+                    <span className="mt-1 rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground">
+                      {count} materials
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -247,7 +274,7 @@ const Materials = () => {
                 return (
                   <button
                     key={sem}
-                    onClick={() => setSelectedSemester(sem)}
+                    onClick={() => handleSelectSemester(sem)}
                     className="group flex flex-col items-start gap-2 rounded-2xl border-2 border-border bg-card p-6 text-left transition-all duration-200 hover:border-primary/50 hover:bg-primary/5 hover:shadow-lg"
                   >
                     <div className="flex items-center gap-2">
@@ -267,7 +294,7 @@ const Materials = () => {
           </div>
         )}
 
-        {/* STEP 4: Materials View (with subject & category filters) */}
+        {/* STEP 4: Materials View */}
         {selectedCourse && selectedSemester !== null && (
           <div className="mt-6">
             <div className="flex items-center gap-2 mb-4">
@@ -277,7 +304,6 @@ const Materials = () => {
               </h2>
             </div>
 
-            {/* Search */}
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -288,7 +314,6 @@ const Materials = () => {
               />
             </div>
 
-            {/* Category tabs */}
             <div className="mt-4 flex flex-wrap gap-2">
               <Button
                 variant={selectedCategory === null ? 'default' : 'outline'}
@@ -309,7 +334,6 @@ const Materials = () => {
               ))}
             </div>
 
-            {/* Subject filters */}
             {subjects.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button
@@ -332,10 +356,9 @@ const Materials = () => {
               </div>
             )}
 
-            {/* Results */}
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((m, i) => (
-                <div key={m.id} className={`animate-fade-up stagger-${Math.min(i + 1, 5)}`}>
+              {filtered.map((m) => (
+                <div key={m.id}>
                   <MaterialCard material={m} />
                 </div>
               ))}
