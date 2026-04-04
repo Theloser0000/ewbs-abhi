@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          created_at: string
+          id: string
+          password: string
+          role: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          password: string
+          role?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          password?: string
+          role?: string
+          username?: string
+        }
+        Relationships: []
+      }
       materials: {
         Row: {
           course: string
@@ -27,6 +51,7 @@ export type Database = {
           subject: string
           title: string
           type: string
+          uploaded_by: string | null
         }
         Insert: {
           course?: string
@@ -40,6 +65,7 @@ export type Database = {
           subject: string
           title: string
           type: string
+          uploaded_by?: string | null
         }
         Update: {
           course?: string
@@ -53,6 +79,7 @@ export type Database = {
           subject?: string
           title?: string
           type?: string
+          uploaded_by?: string | null
         }
         Relationships: []
       }
