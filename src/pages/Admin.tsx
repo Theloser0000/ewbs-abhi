@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Material } from '@/types/material';
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024;
+const MAX_FILE_SIZE = 60 * 1024 * 1024;
 
 const courses = ['BCA', 'BCom', 'BSc', 'PUC', 'BA', 'Other'];
 
@@ -66,7 +66,7 @@ const Admin = () => {
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.error('File too large. Max allowed size is 20MB.');
+      toast.error('File too large. Max allowed size is 60MB.');
       return;
     }
 
