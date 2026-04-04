@@ -66,7 +66,7 @@ const Admin = () => {
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.error('File too large. Max allowed size is 20MB.');
+      toast.error('File too large. Max allowed size is 60MB.');
       return;
     }
 
