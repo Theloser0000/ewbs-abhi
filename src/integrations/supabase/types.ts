@@ -38,6 +38,33 @@ export type Database = {
         }
         Relationships: []
       }
+      head_files: {
+        Row: {
+          created_at: string
+          file_path: string
+          file_size: string | null
+          id: string
+          name: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          file_size?: string | null
+          id?: string
+          name: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          file_size?: string | null
+          id?: string
+          name?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       materials: {
         Row: {
           course: string
