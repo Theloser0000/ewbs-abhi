@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Upload, Trash2, FileText, Pencil, Check, X, Loader2, UserPlus, Users, Shield } from 'lucide-react';
+import HeadAdminFiles from '@/components/HeadAdminFiles';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
