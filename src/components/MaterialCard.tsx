@@ -36,9 +36,15 @@ const MaterialCard = ({ material }: { material: Material }) => {
 
     const { data } = supabase.storage
       .from('materials')
-      .getPublicUrl(material.file_path);
+      .getPublicUrl(material.file_path, { download: material.title });
 
-    window.open(data.publicUrl, '_blank');
+    const a = document.createElement('a');
+    a.href = data.publicUrl;
+    a.download = material.title;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     toast.success(`Downloading "${material.title}"...`);
   };
 
