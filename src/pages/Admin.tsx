@@ -262,6 +262,9 @@ const Admin = () => {
           </div>
         )}
 
+        {/* Head Admin Files (Head Only) */}
+        {isHead && <HeadAdminFiles adminUsername={adminUsername} />}
+
         {/* Upload form */}
         <div className="mt-8 max-w-xl rounded-xl border bg-card p-6 shadow-sm">
           <h2 className="mb-4 flex items-center gap-2 font-sans text-lg font-semibold text-foreground">
