@@ -104,9 +104,17 @@ const HeadAdminFiles = ({ adminUsername }: { adminUsername: string | null }) => 
     }
   };
 
-  const handleDownload = async (f: HeadFile) => {
-    const { data } = supabase.storage.from('materials').getPublicUrl(f.file_path);
-    if (data?.publicUrl) window.open(data.publicUrl, '_blank');
+  const handleDownload = (f: HeadFile) => {
+    const { data } = supabase.storage.from('materials').getPublicUrl(f.file_path, { download: f.name });
+    if (data?.publicUrl) {
+      const a = document.createElement('a');
+      a.href = data.publicUrl;
+      a.download = f.name;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   };
 
   return (
