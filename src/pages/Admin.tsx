@@ -81,54 +81,59 @@ const Admin = () => {
       toast.error('Please fill in all fields');
       return;
     }
-    if (!file) {
-      toast.error('Please select a file to upload');
+    if (files.length === 0) {
+      toast.error('Please select at least one file to upload');
       return;
     }
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error('File too large. Max allowed size is 60MB.');
-      return;
+    for (const f of files) {
+      if (f.size > MAX_FILE_SIZE) {
+        toast.error(`"${f.name}" is too large. Max 60MB per file.`);
+        return;
+      }
     }
 
     setUploading(true);
-    let uploadedFilePath: string | null = null;
+    let successCount = 0;
     try {
-      const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-      const { error: storageError } = await supabase.storage
-        .from('materials')
-        .upload(fileName, file);
-      if (storageError) throw storageError;
-      uploadedFilePath = fileName;
+      await Promise.all(
+        files.map(async (f, idx) => {
+          const fileName = `${Date.now()}-${idx}-${f.name.replace(/\s+/g, '-')}`;
+          const { error: storageError } = await supabase.storage
+            .from('materials')
+            .upload(fileName, f);
+          if (storageError) throw storageError;
 
-      const { error: dbError } = await supabase.from('materials').insert({
-        title: title.trim(),
-        subject: subject.trim(),
-        description: description.trim(),
-        type: fileType,
-        course,
-        semester: parseInt(semester),
-        file_size: formatFileSize(file.size),
-        file_path: fileName,
-        uploaded_by: adminUsername,
-      });
+          const fileTitle = files.length > 1 ? `${title.trim()} - ${f.name}` : title.trim();
+          const { error: dbError } = await supabase.from('materials').insert({
+            title: fileTitle,
+            subject: subject.trim(),
+            description: description.trim(),
+            type: fileType,
+            course,
+            semester: parseInt(semester),
+            file_size: formatFileSize(f.size),
+            file_path: fileName,
+            uploaded_by: adminUsername,
+          });
+          if (dbError) {
+            await supabase.storage.from('materials').remove([fileName]);
+            throw dbError;
+          }
+          successCount++;
+        })
+      );
 
-      if (dbError) {
-        if (uploadedFilePath) {
-          await supabase.storage.from('materials').remove([uploadedFilePath]);
-        }
-        throw dbError;
-      }
-
-      toast.success('Material uploaded successfully!');
+      toast.success(`${successCount} material(s) uploaded successfully!`);
       setTitle('');
       setSubject('');
       setDescription('');
-      setFile(null);
+      setFiles([]);
       const fileInput = document.getElementById('file-input') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
       fetchMaterials();
     } catch (error: any) {
-      toast.error(error?.message || 'Upload failed');
+      toast.error(error?.message || `Upload failed (${successCount}/${files.length} succeeded)`);
+      fetchMaterials();
     } finally {
       setUploading(false);
     }
