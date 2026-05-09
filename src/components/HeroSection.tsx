@@ -32,11 +32,6 @@ const HeroSection = () => {
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </Link>
-            <Link to="/admin">
-              <Button variant="outline" size="lg">
-                Upload Material
-              </Button>
-            </Link>
           </div>
         </div>
 
