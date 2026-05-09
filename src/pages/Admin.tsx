@@ -319,9 +319,12 @@ const Admin = () => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-foreground">File</label>
-              <Input id="file-input" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.webp" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-              <p className="mt-1 text-xs text-muted-foreground">Supported: PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, PNG, WEBP</p>
+              <label className="mb-1.5 block text-sm font-medium text-foreground">Files (multiple allowed)</label>
+              <Input id="file-input" type="file" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.webp" onChange={(e) => setFiles(Array.from(e.target.files || []))} />
+              <p className="mt-1 text-xs text-muted-foreground">Supported: PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, PNG, WEBP. Max 60MB per file.</p>
+              {files.length > 0 && (
+                <p className="mt-1 text-xs text-primary">{files.length} file(s) selected</p>
+              )}
             </div>
 
             <Button onClick={handleUpload} className="w-full gap-2" disabled={uploading}>
