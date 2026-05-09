@@ -13,7 +13,7 @@ const Navbar = () => {
   const links = [
     { to: '/', label: 'Home' },
     { to: '/materials', label: 'Materials' },
-    ...(isAdmin ? [{ to: '/admin', label: 'Admin' }] : []),
+    { to: '/admin', label: 'Upload' },
   ];
 
   const handleLogout = () => {
