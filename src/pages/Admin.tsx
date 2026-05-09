@@ -31,7 +31,7 @@ const Admin = () => {
   const [fileType, setFileType] = useState('Textbook');
   const [course, setCourse] = useState('BCA');
   const [semester, setSemester] = useState('1');
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
