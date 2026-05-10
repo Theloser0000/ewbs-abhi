@@ -308,6 +308,8 @@ const Admin = () => {
                 <select value={fileType} onChange={(e) => setFileType(e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring">
                   <option value="Textbook">Textbook</option>
                   <option value="Question Paper">Question Paper</option>
+                  <option value="Notes">Notes</option>
+                  <option value="Other">Other</option>
                   <option value="Other">Other</option>
                 </select>
               </div>
