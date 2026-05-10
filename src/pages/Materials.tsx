@@ -10,6 +10,7 @@ import type { Material } from '@/types/material';
 
 const courses = [
   { name: 'BCA', icon: '💻', desc: 'Bachelor of Computer Applications' },
+  { name: 'BBA', icon: '💼', desc: 'Bachelor of Business Administration' },
   { name: 'BCom', icon: '📊', desc: 'Bachelor of Commerce' },
   { name: 'BSc', icon: '🔬', desc: 'Bachelor of Science' },
   { name: 'PUC', icon: '📚', desc: 'Pre-University Course' },
@@ -17,7 +18,7 @@ const courses = [
   { name: 'Other', icon: '📁', desc: 'Other Courses' },
 ];
 
-const categories = ['Textbook', 'Question Paper', 'Other'];
+const categories = ['Textbook', 'Question Paper', 'Notes', 'Other'];
 
 const getYear = (sem: number) => Math.ceil(sem / 2);
 const getSemestersForYear = (year: number) => [year * 2 - 1, year * 2];
@@ -322,47 +323,31 @@ const Materials = () => {
               />
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button
-                variant={selectedCategory === null ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedCategory(null)}
-              >
-                All
-              </Button>
-              {categories.map((cat) => (
-                <Button
-                  key={cat}
-                  variant={selectedCategory === cat ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedCategory(cat)}
-                >
-                  {cat}
-                </Button>
-              ))}
-            </div>
-
-            {subjects.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button
-                  variant={selectedSubject === null ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedSubject(null)}
-                >
-                  All Subjects
-                </Button>
-                {subjects.map((subj) => (
-                  <Button
-                    key={subj}
-                    variant={selectedSubject === subj ? 'secondary' : 'ghost'}
-                    size="sm"
-                    onClick={() => setSelectedSubject(subj)}
+            <div className="mt-5 flex flex-wrap gap-2">
+              {[
+                { key: null, label: 'All', icon: '🗂️' },
+                { key: 'Textbook', label: 'Textbook', icon: '📘' },
+                { key: 'Question Paper', label: 'Question Paper', icon: '📝' },
+                { key: 'Notes', label: 'Notes', icon: '🗒️' },
+                { key: 'Other', label: 'Other', icon: '📁' },
+              ].map((c) => {
+                const active = selectedCategory === c.key;
+                return (
+                  <button
+                    key={c.label}
+                    onClick={() => setSelectedCategory(c.key)}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm font-medium transition-all ${
+                      active
+                        ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                        : 'border-border bg-card text-foreground hover:border-primary/40 hover:bg-primary/5'
+                    }`}
                   >
-                    {subj}
-                  </Button>
-                ))}
-              </div>
-            )}
+                    <span>{c.icon}</span>
+                    {c.label}
+                  </button>
+                );
+              })}
+            </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((m) => (
