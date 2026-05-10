@@ -63,12 +63,7 @@ const MaterialCard = ({ material }: { material: Material }) => {
       </p>
 
       <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-medium text-primary">{material.subject}</span>
-          <span className="text-[11px] text-muted-foreground">
-            {material.downloads.toLocaleString()} downloads
-          </span>
-        </div>
+        <span className="text-xs font-medium text-primary">{material.subject}</span>
         <Button
           size="sm"
           variant="outline"
