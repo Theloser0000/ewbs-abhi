@@ -349,6 +349,28 @@ const Materials = () => {
               })}
             </div>
 
+            {subjects.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  variant={selectedSubject === null ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSelectedSubject(null)}
+                >
+                  All Subjects
+                </Button>
+                {subjects.map((subj) => (
+                  <Button
+                    key={subj}
+                    variant={selectedSubject === subj ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setSelectedSubject(subj)}
+                  >
+                    {subj}
+                  </Button>
+                ))}
+              </div>
+            )}
+
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((m) => (
                 <div key={m.id}>
