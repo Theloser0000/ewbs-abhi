@@ -16,7 +16,7 @@ const Index = () => {
 
           <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-6">
             <a
-              href="https://theloser0000.github.io/abhi/"
+              href="https://theloser0000.github.io/2026batch/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-primary underline-offset-4 hover:underline"
@@ -30,7 +30,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 StudyShare. Built for students, by student.
+          © 2026 StudyShare. Built for students, by students.
         </div>
       </footer>
     </div>
