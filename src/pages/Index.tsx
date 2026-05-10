@@ -21,7 +21,7 @@ const Index = () => {
               rel="noopener noreferrer"
               className="text-sm text-primary underline-offset-4 hover:underline"
             >
-              Created by Abhi — View Portfolio
+              Created by 2023 - 2026 batch BCA
             </a>
           </div>
         </div>
