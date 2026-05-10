@@ -10,6 +10,7 @@ import type { Material } from '@/types/material';
 
 const courses = [
   { name: 'BCA', icon: '💻', desc: 'Bachelor of Computer Applications' },
+  { name: 'BBA', icon: '💼', desc: 'Bachelor of Business Administration' },
   { name: 'BCom', icon: '📊', desc: 'Bachelor of Commerce' },
   { name: 'BSc', icon: '🔬', desc: 'Bachelor of Science' },
   { name: 'PUC', icon: '📚', desc: 'Pre-University Course' },
@@ -17,7 +18,7 @@ const courses = [
   { name: 'Other', icon: '📁', desc: 'Other Courses' },
 ];
 
-const categories = ['Textbook', 'Question Paper', 'Other'];
+const categories = ['Textbook', 'Question Paper', 'Notes', 'Other'];
 
 const getYear = (sem: number) => Math.ceil(sem / 2);
 const getSemestersForYear = (year: number) => [year * 2 - 1, year * 2];
