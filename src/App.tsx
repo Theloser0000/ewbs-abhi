@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import WelcomePopup from "@/components/WelcomePopup";
 import Index from "./pages/Index.tsx";
 import Materials from "./pages/Materials.tsx";
 import Admin from "./pages/Admin.tsx";
@@ -18,6 +19,7 @@ const App = () => (
       <AuthProvider>
         <Toaster />
         <Sonner />
+        <WelcomePopup />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
