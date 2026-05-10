@@ -58,9 +58,6 @@ const MaterialCard = ({ material }: { material: Material }) => {
         <span className="text-xs text-muted-foreground">{material.file_size || ''}</span>
       </div>
 
-      <h3 className="mb-1.5 font-sans text-base font-semibold leading-snug text-foreground">
-        {material.title}
-      </h3>
       <p className="mb-4 text-sm leading-relaxed text-muted-foreground line-clamp-2">
         {material.description}
       </p>
