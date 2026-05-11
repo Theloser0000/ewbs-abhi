@@ -1,4 +1,4 @@
-import { FileText, Download, StickyNote, Presentation, User, Calendar } from 'lucide-react';
+import { FileText, Download, StickyNote, Presentation, User, Calendar, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -49,6 +49,15 @@ const MaterialCard = ({ material }: { material: Material }) => {
     a.click();
     document.body.removeChild(a);
     toast.success(`Downloading "${material.title}"...`);
+  };
+
+  const handleView = () => {
+    if (!material.file_path) {
+      toast.error('No file available to view');
+      return;
+    }
+    const { data } = supabase.storage.from('materials').getPublicUrl(material.file_path);
+    window.open(data.publicUrl, '_blank', 'noopener,noreferrer');
   };
 
   const formattedDate = new Date(material.created_at).toLocaleDateString(undefined, {
@@ -105,7 +114,16 @@ const MaterialCard = ({ material }: { material: Material }) => {
         </div>
       </div>
 
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="gap-1.5"
+          onClick={handleView}
+        >
+          <Eye className="h-3.5 w-3.5" />
+          View
+        </Button>
         <Button
           size="sm"
           variant="outline"
