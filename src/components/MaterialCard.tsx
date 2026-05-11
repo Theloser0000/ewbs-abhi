@@ -114,7 +114,16 @@ const MaterialCard = ({ material }: { material: Material }) => {
         </div>
       </div>
 
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="gap-1.5"
+          onClick={handleView}
+        >
+          <Eye className="h-3.5 w-3.5" />
+          View
+        </Button>
         <Button
           size="sm"
           variant="outline"
