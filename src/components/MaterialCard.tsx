@@ -69,10 +69,7 @@ const MaterialCard = ({ material }: { material: Material }) => {
         )}
       </div>
 
-      <h3 className="mb-1 text-base font-semibold leading-snug text-foreground line-clamp-2">
-        {material.title}
-      </h3>
-      <p className="mb-2 text-sm font-medium text-primary">{material.subject}</p>
+      <p className="mb-2 text-base font-semibold text-primary">{material.subject}</p>
 
       {(material.course || material.semester !== undefined) && (
         <div className="mb-2 flex flex-wrap gap-1.5">
