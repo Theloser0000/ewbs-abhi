@@ -59,7 +59,7 @@ const WelcomePopup = () => {
         </div>
 
         <h2 className="font-serif text-2xl text-foreground md:text-3xl">
-          Welcome to our EWBS Study Material
+          Welcome to our EWBS Study Materials
         </h2>
         <p className="mt-3 text-sm text-muted-foreground">
           Browse, download and share quality resources curated for East West Business School students.

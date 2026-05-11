@@ -50,7 +50,7 @@ const MaterialCard = ({ material }: { material: Material }) => {
 
   return (
     <div className="group rounded-xl border bg-card p-5 shadow-sm transition-shadow duration-300 hover:shadow-md">
-      <div className="mb-3 flex items-start justify-between">
+      <div className="mb-3 flex items-start justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
           <Icon className={`h-3.5 w-3.5 ${config.color}`} />
           {config.label}
@@ -58,12 +58,15 @@ const MaterialCard = ({ material }: { material: Material }) => {
         <span className="text-xs text-muted-foreground">{material.file_size || ''}</span>
       </div>
 
+      <h3 className="mb-2 text-base font-semibold leading-snug text-foreground line-clamp-2">
+        {material.subject}
+      </h3>
+
       <p className="mb-4 text-sm leading-relaxed text-muted-foreground line-clamp-2">
         {material.description}
       </p>
 
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-primary">{material.subject}</span>
+      <div className="flex items-center justify-end">
         <Button
           size="sm"
           variant="outline"
