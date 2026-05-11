@@ -1,4 +1,4 @@
-import { FileText, Download, StickyNote, Presentation, User, Calendar } from 'lucide-react';
+import { FileText, Download, StickyNote, Presentation, User, Calendar, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
