@@ -51,6 +51,15 @@ const MaterialCard = ({ material }: { material: Material }) => {
     toast.success(`Downloading "${material.title}"...`);
   };
 
+  const handleView = () => {
+    if (!material.file_path) {
+      toast.error('No file available to view');
+      return;
+    }
+    const { data } = supabase.storage.from('materials').getPublicUrl(material.file_path);
+    window.open(data.publicUrl, '_blank', 'noopener,noreferrer');
+  };
+
   const formattedDate = new Date(material.created_at).toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
