@@ -19,7 +19,7 @@ const Index = () => {
               href="https://theloser0000.github.io/2026batch/"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-primary underline-offset-4 hover:underline"
+              className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-md transition-transform hover:scale-105 hover:shadow-lg"
             >
               Created by 2023 - 2026 batch BCA
             </a>
